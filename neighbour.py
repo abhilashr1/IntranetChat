@@ -1,5 +1,6 @@
 # Layer 2 network neighbourhood discovery tool
 # written by Benedikt Waldvogel (mail at bwaldvogel.de)
+# Modified to suit programming needs
 
 import scapy.config
 import scapy.layers.l2
