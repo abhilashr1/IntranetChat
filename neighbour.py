@@ -9,6 +9,18 @@ import socket
 import math
 import errno
 
+def get_address():
+    try:
+        address = socket.gethostbyname(socket.gethostname())
+        # On my system, this always gives me 127.0.0.1. Hence...
+    except:
+        address = ''
+    if not address or address.startswith('127.'):
+        # ...the hard way.
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(('4.2.2.1', 0))
+        address = s.getsockname()[0]
+    return address
 
 
 def netmask_finder(arg):
@@ -32,7 +44,7 @@ def CIDR_convert(bytes_network, bytes_netmask):
 
 
 def scanner(net, interface, timeout=1):
-    print("arping %s on %s" % (net, interface))
+    print(">> Running Network scanner : arping %s on %s" % (net, interface))
     addr = []
     try:
         ans, unans = scapy.layers.l2.arping(net, iface=interface, timeout=timeout, verbose=False)
