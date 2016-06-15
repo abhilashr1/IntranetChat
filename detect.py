@@ -16,7 +16,7 @@ class detect(threading.Thread):
 
     def addtofile(self,dest,message):
 
-        message = message+'\n\n'
+        message = message+'\n'
 
         path = os.path.join(os.getcwd(), 'data')
         if os.path.isdir(path):
@@ -38,6 +38,9 @@ class detect(threading.Thread):
             os.mkdir(path)
             with open(self.filepath,'w') as f:
                 f.write('*****************************************************\n\tCHAT WITH '+dest+'\n*****************************************************\n\n\n'+message)
+
+        # Add code to refresh convo
+        
 
 
     def run(self):

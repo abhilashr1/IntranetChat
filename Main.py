@@ -9,10 +9,12 @@ import detect
 from random import randint
 import re
 
+
+
 # BEGIN UI imports
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import pyqtSlot,SIGNAL,SLOT
-
+from PyQt4.QtCore import QTimer
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
@@ -33,6 +35,9 @@ except AttributeError:
 
 class UI_Loader(UI.Ui_MainWindow):
     def __init__(self):
+        self.everyone = []
+        self.timer = QtCore.QTimer()
+
         self.username = {
         0: 'Panda',
         1: 'Popeye',
@@ -85,6 +90,7 @@ class UI_Loader(UI.Ui_MainWindow):
         # Load the text to GUI
 
         self.ui.MessageLogs.setPlainText(text)
+        self.ui.MessageLogs.moveCursor(QtGui.QTextCursor.End)
 
     def getconvo(self,item):
         self.refreshconvo(item.text())
@@ -109,7 +115,7 @@ class UI_Loader(UI.Ui_MainWindow):
         username = self.ui.User.toPlainText()
         if username=='' or username==' ':
             username=self.username[randint(0,9)]
-        message = username+' >> '+message+'\n\n';
+        message = username+' >> '+message+'\n';
 
         with open(self.filepath,'a') as f:
             f.write(message)
@@ -118,7 +124,6 @@ class UI_Loader(UI.Ui_MainWindow):
         ip = re.findall( r'[0-9]+(?:\.[0-9]+){3}', self.filepath )
         dest=ip[0]
 
-        print('>> Destination : ',dest,'\n>> Message: ',message)
         self.client_send = threading.Thread(target=detect.client, args=(dest,message))
         self.client_send.start()
 
@@ -133,22 +138,28 @@ class UI_Loader(UI.Ui_MainWindow):
         list_of_neighbours = neighbour.neighbours()
         no_of_neighbours = len(list_of_neighbours)
 
+        
+
         for i in range(no_of_neighbours):
             itemstr = [j for (k,j) in enumerate(list_of_neighbours[i])]
             item = QtGui.QListWidgetItem(itemstr[1])
             print(itemstr[1])
+            self.everyone.append(itemstr[1])
             ui_list.connect(ui_list,SIGNAL(_fromUtf8("itemClicked(QListWidgetItem*)")),self.getconvo)
             ui_list.addItem(item)
 
         # Adding own IP for TESTING
         ui_list.addItem('192.168.0.100')
-
+        self.everyone.append('192.168.0.100')
         QtCore.QObject.connect(self.ui.RetrieveLog_2, QtCore.SIGNAL(_fromUtf8("clicked()")), self.fillclients)
 
         ipaddress = socket.gethostbyname(socket.gethostname())
         ipfield = self.ui.IP.setPlainText(ipaddress)
-        print("refreshed")
         self.ui.statusbar.showMessage(">> Done")
+
+    def refresherconvo(self):
+        for i in self.everyone:
+            self.refreshconvo(i)
 
     def load(self):
         app = QtGui.QApplication(sys.argv)
@@ -157,9 +168,13 @@ class UI_Loader(UI.Ui_MainWindow):
         self.ui.User.setPlainText(self.username[randint(0,9)])
         QtCore.QObject.connect(self.ui.RetrieveLog_2, QtCore.SIGNAL(_fromUtf8("clicked()")), self.fillclients)
         QtCore.QObject.connect(self.ui.RetrieveLog, QtCore.SIGNAL(_fromUtf8("clicked()")), self.send)
+        QtCore.QObject.connect(self.timer, QtCore.SIGNAL(_fromUtf8("timeout()")), self.refresherconvo)
+        self.timer.start(2 * 1000)
+        # Thread to constantly reload all convos
+        #refresher = threading.Thread(target=self.refresherconvo)
+        #refresher.start()
         self.MainWindow.show()
         sys.exit(app.exec_())
-
 
 
 
