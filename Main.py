@@ -46,6 +46,16 @@ class UI_Loader(UI.Ui_MainWindow):
         9: 'Schrodinger'
         }
 
+        '''self.own_ip = neighbour.get_address() 
+        self.getport = 54321
+
+        # Set up the universal server
+        self.uniserv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.uniserv.bind((self.own_ip,self.getport))
+        self.uniserv.listen(5)
+        '''
+
+
     def refreshconvo(self,dest):
         path = os.path.join(os.getcwd(), 'data')
 
@@ -80,6 +90,18 @@ class UI_Loader(UI.Ui_MainWindow):
         self.refreshconvo(item.text())
         
 
+
+    '''def sendmessage(self,msg,dest):
+        # The part which involves sending 
+
+        # 1. Set up the universal server to listen
+
+        (putsocket,recvaddr)=self.uniserv.accept()
+        print('>> New message from ',recvaddr)
+        username = 
+    '''
+
+
     def send(self):
         message = self.ui.User_LogRetrieve.toPlainText()
         self.ui.User_LogRetrieve.clear()
@@ -95,6 +117,11 @@ class UI_Loader(UI.Ui_MainWindow):
         #reload the convoscreen
         ip = re.findall( r'[0-9]+(?:\.[0-9]+){3}', self.filepath )
         dest=ip[0]
+
+        print('>> Destination : ',dest,'\n>> Message: ',message)
+        self.client_send = threading.Thread(target=detect.client, args=(dest,message))
+        self.client_send.start()
+
         self.refreshconvo(dest)
 
 
@@ -112,6 +139,10 @@ class UI_Loader(UI.Ui_MainWindow):
             print(itemstr[1])
             ui_list.connect(ui_list,SIGNAL(_fromUtf8("itemClicked(QListWidgetItem*)")),self.getconvo)
             ui_list.addItem(item)
+
+        # Adding own IP for TESTING
+        ui_list.addItem('192.168.0.100')
+
         QtCore.QObject.connect(self.ui.RetrieveLog_2, QtCore.SIGNAL(_fromUtf8("clicked()")), self.fillclients)
 
         ipaddress = socket.gethostbyname(socket.gethostname())
@@ -141,12 +172,12 @@ class MAIN(threading.Thread):
 
     def run(self):
         if self.name=='ui':
-            print('>>> Loading...')
+            print('>> Loading...')
 
             # Wake up the Neighbours
 
             list_of_neighbours = neighbour.neighbours()
-            print(">>> Detected list of Neighbours ")
+            print(">> Detected list of Neighbours ")
 
             # Load up the UI
             ui = UI_Loader()
@@ -165,8 +196,11 @@ class MAIN(threading.Thread):
 
 if __name__=='__main__':
 
-    runner_ui = MAIN('ui')
-    runner_ui.start()
+    try:
+        runner_ui = MAIN('ui')
+        runner_ui.start()
 
-    runner_net = MAIN('network')
-    runner_net.start()
+        runner_net = MAIN('network')
+        runner_net.start()
+    except Exception as e:
+        print('>> Exiting. Reason: ',e)
