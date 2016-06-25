@@ -10,7 +10,7 @@ Remember to run this with Administrator Previliges.
 
 ###Screenshot
 
-![Screenshot of Python Intranet Chat](Screenshot.jpg)
+![Screenshot of Python Intranet Chat](Screenshot.png)
 
 ##Requirements
 
