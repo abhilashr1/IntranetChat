@@ -9,5 +9,5 @@ have the app running too, you can send text messages to them.
 
 1. Python3
 2. pip
-3. scapy-python3
-4. 
+3. PyQt4
+4. scapy-python3
